@@ -1,0 +1,14 @@
+central:
+  organizationID: "<AMPLIFY_ORG_ID>"
+  environment: <AMPLIFY_CENTRAL_ENVIRONMENT_NAME>
+  auth:
+    clientID: <AMPLIFY_CENTRAL_DOSA_CLIENT_ID>
+    privateKey: <AMPLIFY_CENTRAL_DOSA_PRIVATE_KEY_PATH>
+    publicKey: <AMPLIFY_CENTRAL_DOSA_PUBLIC_KEY_PATH>
+
+layer7:
+  host: ""
+  api: ""
+  username: ""
+  password: ""
+  pollInterval: ""
