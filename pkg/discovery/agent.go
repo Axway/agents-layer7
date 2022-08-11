@@ -1,11 +1,11 @@
 package discovery
 
 import (
-	"git.ecd.axway.org/tjohnson/layer7/pkg/client"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/config"
 	"github.com/Axway/agent-sdk/pkg/agent"
 	"github.com/Axway/agent-sdk/pkg/jobs"
 	"github.com/Axway/agent-sdk/pkg/util/log"
+	"github.com/Axway/agents-layer7/pkg/client"
+	"github.com/Axway/agents-layer7/pkg/config"
 )
 
 // NewAgent creates an agent for API Discovery

@@ -4,8 +4,8 @@ import (
 	corecmd "github.com/Axway/agent-sdk/pkg/cmd"
 	corecfg "github.com/Axway/agent-sdk/pkg/config"
 
-	"git.ecd.axway.org/tjohnson/layer7/pkg/config"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/discovery"
+	"github.com/Axway/agents-layer7/pkg/config"
+	"github.com/Axway/agents-layer7/pkg/discovery"
 )
 
 // RootCmd - Agent root command

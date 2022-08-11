@@ -5,14 +5,14 @@ import (
 	"fmt"
 	"strings"
 
-	"git.ecd.axway.org/tjohnson/layer7/pkg/client"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/config"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/policy"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/service"
-	util2 "git.ecd.axway.org/tjohnson/layer7/pkg/util"
 	"github.com/Axway/agent-sdk/pkg/agent"
 	"github.com/Axway/agent-sdk/pkg/apic"
 	"github.com/Axway/agent-sdk/pkg/util/log"
+	"github.com/Axway/agents-layer7/pkg/client"
+	"github.com/Axway/agents-layer7/pkg/config"
+	"github.com/Axway/agents-layer7/pkg/models/policy"
+	"github.com/Axway/agents-layer7/pkg/models/service"
+	util2 "github.com/Axway/agents-layer7/pkg/util"
 )
 
 const (

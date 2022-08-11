@@ -3,8 +3,8 @@ package discovery
 import (
 	"sync"
 
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/service"
 	"github.com/Axway/agent-sdk/pkg/cache"
+	"github.com/Axway/agents-layer7/pkg/models/service"
 )
 
 type validator struct {
@@ -22,7 +22,7 @@ func newValidator() *validator {
 func (v *validator) SetAPIs(svcs []service.Item) {
 	v.lock.Lock()
 	defer v.lock.Unlock()
-	
+
 	oldKeys := v.cache.GetKeys()
 	for _, k := range oldKeys {
 		v.cache.Delete(k)

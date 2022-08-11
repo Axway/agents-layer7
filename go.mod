@@ -1,4 +1,4 @@
-module git.ecd.axway.org/tjohnson/layer7
+module github.com/Axway/agents-layer7
 
 go 1.17
 

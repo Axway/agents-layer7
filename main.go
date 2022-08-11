@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"git.ecd.axway.org/tjohnson/layer7/pkg/cmd"
+	"github.com/Axway/agents-layer7/pkg/cmd"
 )
 
 func main() {

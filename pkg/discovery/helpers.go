@@ -3,8 +3,8 @@ package discovery
 import (
 	"strings"
 
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/service"
 	"github.com/Axway/agent-sdk/pkg/apic"
+	"github.com/Axway/agents-layer7/pkg/models/service"
 )
 
 func getPolicyRevision(props []service.Property) string {

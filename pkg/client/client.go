@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/policy"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/policyversion"
-	"git.ecd.axway.org/tjohnson/layer7/pkg/models/service"
+	"github.com/Axway/agents-layer7/pkg/models/policy"
+	"github.com/Axway/agents-layer7/pkg/models/policyversion"
+	"github.com/Axway/agents-layer7/pkg/models/service"
 	xj "github.com/basgys/goxml2json"
 	"github.com/sirupsen/logrus"
 )
