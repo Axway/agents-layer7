@@ -25,6 +25,7 @@ const (
 	minorHash           = "minorHash"
 	majorHash           = "majorHash"
 	activePolicyVersion = "activePolicyVersion"
+	xmlIndent           = "  "
 )
 
 // ServiceDetail - Sample struct representing the API definition in API gateway
@@ -151,8 +152,7 @@ func (a *apiDiscovery) getAPIEndpoint(mappings service.ServiceMappings) string {
 }
 
 func (a *apiDiscovery) buildService(ext *ServiceDetail, svc service.Service, p *policy.PolicyItem) error {
-	isSoap := isSoapAPI(svc.ServiceDetail.Properties.Property)
-	if isSoap {
+	if isSoapAPI(svc.ServiceDetail.Properties.Property) {
 		return a.processSoap(ext, svc)
 	}
 	return a.processService(ext, svc, p)
@@ -246,7 +246,7 @@ func (a *apiDiscovery) processService(ext *ServiceDetail, svc service.Service, p
 	}
 
 	// Unstructured
-	unstructuredSvc, err := xml.MarshalIndent(svc, "", "    ")
+	unstructuredSvc, err := xml.MarshalIndent(svc, "", xmlIndent)
 	if err != nil {
 		return err
 	}
