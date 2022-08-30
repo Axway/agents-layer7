@@ -8,13 +8,15 @@ import (
 )
 
 type validator struct {
-	cache cache.Cache
-	lock  sync.RWMutex
+	cache            cache.Cache
+	cacheInitialized bool
+	lock             sync.RWMutex
 }
 
 func newValidator() *validator {
 	return &validator{
-		cache: cache.New(),
+		cacheInitialized: false,
+		cache:            cache.New(),
 	}
 }
 
@@ -31,6 +33,7 @@ func (v *validator) SetAPIs(svcs []service.Item) {
 	for _, svc := range svcs {
 		v.cache.Set(svc.ID, svc)
 	}
+	v.cacheInitialized = true
 }
 
 // Validate returns true if the api is found in the cache, and false if not
@@ -38,6 +41,9 @@ func (v *validator) Validate(apiID, _ string) bool {
 	v.lock.RLock()
 	defer v.lock.RUnlock()
 
-	_, err := v.cache.Get(apiID)
-	return err == nil
+	if v.cacheInitialized {
+		_, err := v.cache.Get(apiID)
+		return err == nil
+	}
+	return true
 }

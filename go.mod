@@ -3,7 +3,7 @@ module github.com/Axway/agents-layer7
 go 1.17
 
 require (
-	github.com/Axway/agent-sdk v1.1.31-0.20220729203237-41fc3a9a21b6
+	github.com/Axway/agent-sdk v1.1.33-0.20220826220751-fa4a2f7d7fed
 	github.com/basgys/goxml2json v1.1.0
 	github.com/sirupsen/logrus v1.8.1
 	github.com/stretchr/testify v1.8.0
@@ -11,6 +11,7 @@ require (
 
 require (
 	github.com/armon/go-radix v1.0.0 // indirect
+	github.com/bitly/go-simplejson v0.5.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.0.0-20210816181553-5444fa50b93d // indirect
 	github.com/elastic/beats/v7 v7.17.5 // indirect

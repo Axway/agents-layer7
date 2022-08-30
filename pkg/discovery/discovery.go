@@ -2,8 +2,10 @@ package discovery
 
 import (
 	"encoding/base64"
+	"encoding/xml"
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/Axway/agent-sdk/pkg/agent"
 	"github.com/Axway/agent-sdk/pkg/apic"
@@ -70,12 +72,13 @@ func (a *apiDiscovery) Execute() error {
 		return err
 	}
 
-	a.validator.SetAPIs(services.List.Item)
-
+	wg := sync.WaitGroup{}
 	for _, item := range services.List.Item {
-		svc := item.Resource.Service
+		wg.Add(1)
 
+		svc := item.Resource.Service
 		go func(s service.Service) {
+			defer wg.Done()
 			err := a.process(s)
 			if err != nil {
 				a.log.Errorf("failed to process service: %s", err)
@@ -83,6 +86,8 @@ func (a *apiDiscovery) Execute() error {
 		}(svc)
 	}
 
+	wg.Wait()
+	a.validator.SetAPIs(services.List.Item)
 	return nil
 }
 
@@ -104,7 +109,7 @@ func (a *apiDiscovery) process(svc service.Service) error {
 
 	ext.ServiceAttributes = getSvcProperties(svcProperties)
 
-	ext, err = a.buildService(ext, svc, p)
+	err = a.buildService(ext, svc, p)
 	if err != nil {
 		a.log.Info(err)
 		return nil
@@ -114,10 +119,7 @@ func (a *apiDiscovery) process(svc service.Service) error {
 		return nil
 	}
 
-	go func() {
-		a.apiCh <- ext
-	}()
-
+	a.apiCh <- ext
 	return nil
 }
 
@@ -148,16 +150,12 @@ func (a *apiDiscovery) getAPIEndpoint(mappings service.ServiceMappings) string {
 	return ""
 }
 
-func (a *apiDiscovery) buildService(ext *ServiceDetail, svc service.Service, p *policy.PolicyItem) (*ServiceDetail, error) {
+func (a *apiDiscovery) buildService(ext *ServiceDetail, svc service.Service, p *policy.PolicyItem) error {
 	isSoap := isSoapAPI(svc.ServiceDetail.Properties.Property)
-	switch isSoap {
-	case true:
+	if isSoap {
 		return a.processSoap(ext, svc)
-	case false:
-		return a.processOAS(ext, svc, p)
-	default:
-		return ext, fmt.Errorf("unable to determine the api type for processing for %s", ext.APIName)
 	}
+	return a.processService(ext, svc, p)
 }
 
 func (a *apiDiscovery) shouldPublish(ext *ServiceDetail) bool {
@@ -210,15 +208,15 @@ func (a *apiDiscovery) getOASEndpoint(variables []policy.SetVariable) (string, s
 	return apiType, docHost
 }
 
-func (a *apiDiscovery) processSoap(ext *ServiceDetail, svc service.Service) (*ServiceDetail, error) {
+func (a *apiDiscovery) processSoap(ext *ServiceDetail, svc service.Service) error {
 	endpoint := a.getAPIEndpoint(svc.ServiceDetail.ServiceMappings)
 	if endpoint == "" {
-		return ext, fmt.Errorf("unable to find proxy endpoint for %s", svc.ServiceDetail.Name)
+		return fmt.Errorf("unable to find proxy endpoint for %s", svc.ServiceDetail.Name)
 	}
 
 	content := a.getWsdl(svc.Resources.ResourceSet)
 	if content == nil {
-		return ext, fmt.Errorf("unable to find wsdl spec for %s", svc.ServiceDetail.Name)
+		return fmt.Errorf("unable to find wsdl spec for %s", svc.ServiceDetail.Name)
 	}
 
 	ext.APISpec = content
@@ -227,38 +225,47 @@ func (a *apiDiscovery) processSoap(ext *ServiceDetail, svc service.Service) (*Se
 	url := a.cfg.Host + endpoint
 	ep := util2.CreateEndpoint(url)
 	ext.Endpoints = append(ext.Endpoints, ep)
-	return ext, nil
+	return nil
 }
 
-func (a *apiDiscovery) processOAS(ext *ServiceDetail, svc service.Service, p *policy.PolicyItem) (*ServiceDetail, error) {
-	resourceType, docHost := a.getOASEndpoint(p.Policy.All.SetVariable)
-
-	if resourceType == "" {
-		return ext, fmt.Errorf("unable to determine the resource type for %s", svc.ServiceDetail.Name)
-	}
-
-	if docHost == "" {
-		return ext, fmt.Errorf("api spec not found for %s", svc.ServiceDetail.Name)
-	}
-
+func (a *apiDiscovery) processService(ext *ServiceDetail, svc service.Service, p *policy.PolicyItem) error {
 	endpoint := a.getAPIEndpoint(svc.ServiceDetail.ServiceMappings)
 	if endpoint == "" {
-		return ext, fmt.Errorf("unable to find proxy endpoint for %s", svc.ServiceDetail.Name)
+		return fmt.Errorf("unable to find proxy endpoint for %s", svc.ServiceDetail.Name)
 	}
-
-	spec, err := a.client.GetSpec(docHost)
-	if err != nil {
-		return ext, fmt.Errorf("failed to get spec: %s", err)
-	}
-
 	ext.Endpoint = endpoint
 	url := a.cfg.Host + endpoint
-	ext.APISpec = spec
 	ep := util2.CreateEndpoint(url)
 	ext.Endpoints = append(ext.Endpoints, ep)
+
+	resourceType, docHost := a.getOASEndpoint(p.Policy.All.SetVariable)
+
+	if resourceType != "" && docHost != "" {
+		// OAS Spec
+		return a.processOAS(ext, resourceType, docHost)
+	}
+
+	// Unstructured
+	unstructuredSvc, err := xml.MarshalIndent(svc, "", "    ")
+	if err != nil {
+		return err
+	}
+
+	ext.ResourceType = apic.Unstructured
+	ext.APISpec = unstructuredSvc
+	return nil
+}
+
+func (a *apiDiscovery) processOAS(ext *ServiceDetail, resourceType, docHost string) error {
+	spec, err := a.client.GetSpec(docHost)
+	if err != nil {
+		return fmt.Errorf("failed to get spec: %s", err)
+	}
+
+	ext.APISpec = spec
 	ext.ResourceType = resourceType
 
-	return ext, nil
+	return nil
 }
 
 func (a *apiDiscovery) getWsdl(resources []service.ResourceSetElement) []byte {
