@@ -79,7 +79,6 @@ func (c *GatewayClient) GetServices() (*service.ListServices, error) {
 	list := &service.ListServices{}
 	err = json.Unmarshal(buf.Bytes(), list)
 	if err != nil {
-		fmt.Println(err)
 		return nil, err
 	}
 
